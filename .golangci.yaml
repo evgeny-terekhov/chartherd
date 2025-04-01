@@ -1,0 +1,11 @@
+run: 
+  concurrency: 4
+linters:
+  disable-all: true
+  enable:
+    - misspell
+    - gosec
+    - gofmt
+    - gocritic
+    - gosimple
+    - staticcheck

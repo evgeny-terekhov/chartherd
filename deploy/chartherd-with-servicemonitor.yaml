@@ -1,0 +1,156 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chartherd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: chartherd
+  name: chartherd
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - "apiextensions.k8s.io"
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - "helm.cattle.io"
+  resources:
+  - helmcharts
+  verbs:
+  - get
+  - list
+---
+apiVersion: v1
+automountServiceAccountToken: true
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/name: chartherd
+  name: chartherd
+  namespace: chartherd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: chartherd
+  name: chartherd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chartherd
+subjects:
+- kind: ServiceAccount
+  name: chartherd
+  namespace: chartherd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chartherd
+  namespace: chartherd
+  labels:
+    app.kubernetes.io/name: chartherd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chartherd
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: chartherd
+    spec:
+      automountServiceAccountToken: true
+      serviceAccount: chartherd
+      serviceAccountName: chartherd
+      containers:
+      - image: ghcr.io/evgeny-terekhov/chartherd:v1.0.0
+        imagePullPolicy: IfNotPresent
+        name: chartherd
+        env:
+        - name: CHARTHERD_METRICS_ENABLED
+          value: "true"
+        - name: CHARTHERD_OUTPUT
+          value: "none"
+        - name: CHARTHERD_USE_LOCAL_HELM_REPOS
+          value: "false"
+        - name: CHARTHERD_INTERVAL
+          value: "1h"
+        ports:
+        - containerPort: 9420
+          name: metrics
+          protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+---
+# Quick and dirty way to restrict scaling to more than one replica
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: chartherd
+  namespace: chartherd
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: chartherd
+  minReplicas: 1
+  maxReplicas: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: chartherd
+  name: chartherd
+  namespace: chartherd
+spec:
+  ports:
+  - name: metrics
+    port: 9420
+    protocol: TCP
+    targetPort: 9420
+  selector:
+    app.kubernetes.io/name: chartherd
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/name: chartherd
+  name: chartherd
+  namespace: chartherd
+spec:
+  endpoints:
+  - path: /metrics
+    port: metrics
+  jobLabel: app.kubernetes.io/name
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chartherd
