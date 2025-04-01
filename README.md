@@ -18,7 +18,7 @@ export KUBECONFIG=/path/to/kubeconfig
 chartherd
 ```
 
-<video src="img/chartherd01.webm" autoplay loop></video>
+https://github.com/user-attachments/assets/b906f0ca-df8d-485d-bbb6-cab592a6fa27
 
 Charts in a single namespace, use local `repositories.yaml` file, include all chart versions, output as JSON
 ```shell
@@ -26,7 +26,7 @@ export KUBECONFIG=/path/to/kubeconfig
 chartherd --namespace {NAMESPACE_NAME} --include-all --use-local-helm-repos --output json
 ```
 
-<video src="img/chartherd02.webm" autoplay loop></video>
+https://github.com/user-attachments/assets/82739f4f-7a3d-4abd-92cd-e5b4d52bc841
 
 The logs are sent to `stderr` so it's safe to use the output in a pipe.
 
@@ -46,7 +46,7 @@ kubectl create -f chartherd-with-servicemonitor.yaml
 
 Import the dashboard from [the JSON file](deploy/chartherd-grafana-dashboard.json) to Grafana.
 
-<img src="img/chartherd-grafana.png" alt="chartherd Grafana dashboard" style="width:50%; height:auto;">
+<img src="img/chartherd-grafana.png" alt="chartherd Grafana dashboard" style="width:75%; height:auto;">
 
 # Configuration
 | CLI argument | Environment variable | Default value | Description |
