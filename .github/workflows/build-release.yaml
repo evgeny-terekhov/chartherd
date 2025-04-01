@@ -30,7 +30,11 @@ jobs:
         CGO_ENABLED: 0
       run: |
         mkdir -p dist
-        go build -ldflags '-w -s' -trimpath -o dist/chartherd-${{ matrix.os }}-${{ matrix.arch }} ./cmd/chartherd
+        OUTPUT="dist/chartherd-${{ matrix.os }}-${{ matrix.arch }}"
+        if [[ "${{ matrix.os }}" == "windows" ]]; then
+          OUTPUT="$OUTPUT.exe"
+        fi
+        go build -ldflags '-w -s' -trimpath -o $OUTPUT ./cmd/chartherd
 
     - name: Upload binaries as artifacts
       uses: actions/upload-artifact@v4
