@@ -1,8 +1,6 @@
 module github.com/evgeny-terekhov/chartherd
 
-go 1.23.4
-
-toolchain go1.23.6
+go 1.26.10
 
 require (
 	github.com/hashicorp/go-version v1.7.0

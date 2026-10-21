@@ -1,4 +1,4 @@
-FROM golang:1.23 as build
+FROM golang:1.26 as build
 COPY . /src
 WORKDIR /src
 RUN CGO_ENABLED=0 go build -ldflags '-w -s' -trimpath -o chartherd ./cmd/chartherd
